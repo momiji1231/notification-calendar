@@ -3,17 +3,15 @@
 import tkinter as tk
 import datetime
 import re
+import sqlite3
 
 
-# カレンダーを作成するフレームクラス
 class mycalendar(tk.Frame):
     def __init__(self, master=None, cnf={}, **kw):
-        "初期化メソッド"
         tk.Frame.__init__(self, master, cnf, **kw)
 
-        # 現在の日付を取得
         now = datetime.datetime.now()
-        # 現在の年と月を属性に追加
+
         self.year = now.year
         self.month = now.month
         self.today = now.day
@@ -21,21 +19,14 @@ class mycalendar(tk.Frame):
         YEAR = str(self.year)
         MONTH = str(self.month)
 
-        # frame_top部分の作成
         frame_top = tk.Frame(self)
         frame_top.pack(pady=5)
-#        self.previous_month = tk.Label(frame_top, text="<", font=("", 14))
-#        self.previous_month.bind("<1>", self.change_month)
-#        self.previous_month.pack(side="left", padx=10)
+
         self.current_year = tk.Label(frame_top, text="{}年".format(self.year), font=("", 18))
         self.current_year.pack(side="left")
         self.current_month = tk.Label(frame_top, text="{}月".format(self.month), font=("", 18))
         self.current_month.pack(side="left")
-#        self.next_month = tk.Label(frame_top, text=">", font=("", 14))
-#        self.next_month.bind("<1>", self.change_month)
-#        self.next_month.pack(side="left", padx=10)
 
-        # frame_week部分の作成
         frame_week = tk.Frame(self)
         frame_week.pack()
         button_mon = d_button(frame_week, text="月")
@@ -53,39 +44,29 @@ class mycalendar(tk.Frame):
         button_san = d_button(frame_week, text="日", fg="red")
         button_san.grid(column=6, row=0)
 
-        # frame_calendar部分の作成
         self.frame_calendar = tk.Frame(self)
         self.frame_calendar.pack()
 
-        # 日付部分を作成するメソッドの呼び出し
         self.create_calendar(self.year, self.month)
 
     def create_calendar(self, year, month):
-        "指定した年(year),月(month)のカレンダーウィジェットを作成する"
 
-        # ボタンがある場合には削除する（初期化）
         try:
             for key, item in self.day.items():
                 item.destroy()
         except:
             pass
 
-        # calendarモジュールのインスタンスを作成
         import calendar
         cal = calendar.Calendar()
-        # 指定した年月のカレンダーをリストで返す
         days = cal.monthdayscalendar(year, month)
 
-        # 日付ボタンを格納する変数をdict型で作成
         self.day = {}
-        # for文を用いて、日付ボタンを生成
         for i in range(0, 42):
             c = i - (7 * int(i / 7))
             r = int(i / 7)
             try:
-                # 日付が0でなかったら、ボタン作成
                 if days[r][c] != 0:
-                    #日付ボタンを押下すると別ウィンドウを表示
                     if days[r][c] == self.today:
                         self.day[i] = d_button(self.frame_calendar, text=days[r][c], fg="magenta")
                     else:
@@ -99,44 +80,35 @@ class mycalendar(tk.Frame):
                 break
 
     def change_month(self, event):
-        # 押されたラベルを判定し、月の計算
         if event.widget["text"] == "<":
             self.month -= 1
         else:
             self.month += 1
-        # 月が0、13になったときの処理
         if self.month == 0:
             self.year -= 1
             self.month = 12
         elif self.month == 13:
             self.year += 1
             self.month = 1
-        # frame_topにある年と月のラベルを変更する
         self.current_year["text"] = self.year
         self.current_month["text"] = self.month
-        # 日付部分を作成するメソッドの呼び出し
         self.create_calendar(self.year, self.month)
 
-    #別ウィンドウを呼び出し関数
     def createNewWindow(self,event):
         self.newWindow = tk.Toplevel(root)
         self.app = Win2(self.newWindow,event)
 
-
-# デフォルトのボタンクラス
 class d_button(tk.Button):
     def __init__(self, master=None, cnf={}, **kw):
         tk.Button.__init__(self, master, cnf, **kw)
         self.configure(font=("", 14), height=2, width=4, relief="flat")
 
-# 別ウィンドウクラス
 class Win2(tk.Frame):
     def __init__(self,master,event):
         super().__init__(master)
         self.pack()
         self.master.geometry("500x500")
         self.master.title("{}日".format(event.widget["text"]))
-        #押下しボタンの日付を設定
         self.day = event.widget["text"]
         self.today_schedule()
         self.create_text()
@@ -146,11 +118,9 @@ class Win2(tk.Frame):
 
     def today_schedule(self):
         now = datetime.datetime.now()
-        # 現在の年と月を属性に追加
         self.year = now.year
         self.month = now.month if len(str(now.month)) == 2 else "0{}".format(now.month)
         self.yymmdd = "{}-{}-{}".format(self.year, self.month, self.day)
-        import sqlite3
         self.dbfile = sqlite3.connect('schedule.db')
         self.sql = self.dbfile.cursor()
         self.sql.execute("select * from cl_table where YYYYMMDD = ? ORDER BY HHMMSS ASC", (self.yymmdd, ))
@@ -164,11 +134,9 @@ class Win2(tk.Frame):
         if not len(list) == 0:
             for out in list:
                 self.ddmm = tk.Checkbutton(self.master, text="{}  {}".format(out[1],out[2]), variable=bln)
+                self.list_chk.append(bln)
                 self.ddmm.place(x=180, y=i)
                 i = i + 20
-                print("dethe note")
-                print("bln.get={}".format(bln.get))
-                self.list_chk.append(bln)
                 self.list_time.append(out[1])
                 self.list_memo.append(out[2])
         else:
@@ -185,9 +153,7 @@ class Win2(tk.Frame):
         self.schedule_label.place(x=50, y=300)
         self.schedule_input.place(x=100, y=300)
 
-    # 別ウィンドウボタン表示
     def create_addbtn(self):
-        # Button
         self.button_commit = tk.Button(self.master, text="登録", fg="green", command=self.schedule_adding)
         self.button_commit.place(x=420, y=450)
 
@@ -198,8 +164,6 @@ class Win2(tk.Frame):
         self.msg_label = tk.Label(self.master, text="                                                                 ")
         self.msg_label.place(x=200, y=350)
 
-        print("self.time = {} ,self.memo = {}, self.result = {}".format(self.time,self.memo,self.result))
-
         if self.result and not len(self.memo) == 0:
             self.sql.execute("INSERT INTO cl_table VALUES (?,?,?)",[self.yymmdd, self.time, self.memo])
             self.dbfile.commit()
@@ -209,8 +173,6 @@ class Win2(tk.Frame):
             self.worning_message()
 
     def time_invalid(self):
-        print("time_invalid")
-        print(re.fullmatch(r'\d{2}:\d{2}', self.time))
         if re.fullmatch(r'\d{2}:\d{2}', self.time):
             return True
         else:
@@ -229,7 +191,6 @@ class Win2(tk.Frame):
         self.button_quit.place(x=290, y=450)
 
     def schedule_deleting(self):
-        print("self.list_chk = {}, self.list_time = {},self.list_memo = {}".format(self.list_chk, self.list_time ,self.list_memo))
         self.delete_tergets = self.list_chk
         self.delete_times = self.list_time
         self.delete_memos = self.list_memo
@@ -250,22 +211,13 @@ class Win2(tk.Frame):
                 self.msg_label = tk.Label(self.master, text="削除が完了しました", fg="green")
             self.msg_label.place(x=150, y=350)
 
-
-
-
-    # 別ウィンドウボタン表示
     def create_clsbtn(self):
-        # Button
         self.button_quit = tk.Button(self.master, text="閉じる", command=self.quit_window)
         self.button_quit.place(x=350, y=450)
 
-    # 別ウィンドウclose関数
     def quit_window(self):
         self.master.destroy()
 
-
-
-# ルートフレームの定義
 root = tk.Tk()
 root.title("カレンダー")
 mycal = mycalendar(root)
