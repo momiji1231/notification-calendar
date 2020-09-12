@@ -129,10 +129,10 @@ class Win2(tk.Frame):
         self.list_chk = []
         self.list_time = []
         self.list_memo = []
-        bln = tk.BooleanVar()
-        bln.set(False)
         if not len(list) == 0:
             for out in list:
+                bln = tk.BooleanVar()
+                bln.set(False)
                 self.ddmm = tk.Checkbutton(self.master, text="{}  {}".format(out[1],out[2]), variable=bln)
                 self.list_chk.append(bln)
                 self.ddmm.place(x=180, y=i)
