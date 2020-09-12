@@ -1,6 +1,6 @@
-Operating conditions
+tkinter_calendar use environment
 
-macOS Catalina 0.15.5
+macOS Catalina 10.15.5
 
 python --version 
 3.8.0
