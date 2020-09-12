@@ -174,19 +174,35 @@ class Win2(tk.Frame):
 
     def time_invalid(self):
         if re.fullmatch(r'\d{2}:\d{2}', self.time):
-            return True
+            self.time_split = self.time.split(":")
+            if int(self.time_split[0]) <= 24:
+                if int(self.time_split[1]) <= 59:
+                    self.result2 = 0
+                    return True
+                else:
+                    self.result2 = 3
+                    return False
+            else:
+                self.result2 = 2
+                return False
         else:
+            self.result2 = 1
             return False
 
     def worning_message(self):
         if self.result:
             self.msg_label = tk.Label(self.master, text="予定を入力してください", fg="red")
         else:
-            self.msg_label = tk.Label(self.master, text="時刻は 「XX:XX」の形式で入力してください", fg="red")
+            if self.result2 == 1:
+                self.msg_label = tk.Label(self.master, text="時刻は 「XX:XX」の形式で入力してください", fg="red")
+            elif self.result2 == 2:
+                self.msg_label = tk.Label(self.master, text="時間は00 〜 24の間で入力してください", fg="red")
+            else:
+                self.msg_label = tk.Label(self.master, text="分は00 〜 59の間で入力してください", fg="red")
+
         self.msg_label.place(x=150, y=350)
 
     def create_delbtn(self):
-        # Button
         self.button_quit = tk.Button(self.master, text="削除", command=self.schedule_deleting, fg="red")
         self.button_quit.place(x=290, y=450)
 
