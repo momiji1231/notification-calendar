@@ -11,6 +11,7 @@ def job():
     sql = dbfile.cursor()
 
     now = datetime.datetime.now()
+    print("now = {}".format(now))
 
     if now.month <= 9:
         month = "0{}".format(now.month)
@@ -50,8 +51,6 @@ def job():
             ddmm = tk.Label(root, text="{}  {}  の時間です".format(out[1],out[2]))
             ddmm.place(x=180, y=i)
             i = i + 20
-        button_quit = tk.Button(root, text="閉じる", command=root.destroy)
-        button_quit.place(x=420, y=450)
         root.mainloop()
 
 schedule.every(1).minutes.do(job)
