@@ -52,8 +52,10 @@ def job():
             ddmm.place(x=180, y=i)
             i = i + 20
         root.mainloop()
+    else:
+        root.destroy()
 
-schedule.every(1).minutes.do(job)
+schedule.every(30/60).minutes.do(job)
 while True:
     schedule.run_pending()
     time.sleep(1)
